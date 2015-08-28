@@ -551,7 +551,11 @@ class Dropzone extends Emitter
     @options = extend { }, @defaultOptions, elementOptions, options ? { }
 
     # If the browser failed, just call the fallback and leave
-    return @options.fallback.call this if @options.forceFallback or !Dropzone.isBrowserSupported()
+    if @options.forceFallback or !Dropzone.isBrowserSupported()
+      @options.fallback.call this
+    else if (fallback = @getExistingFallback()) and fallback.parentNode
+      # Remove the fallback
+      fallback.parentNode.removeChild fallback
 
     # @options.url = @element.getAttribute "action" unless @options.url?
     @options.url = @element.getAttribute "action" unless @options.url?
@@ -566,10 +570,6 @@ class Dropzone extends Emitter
       delete @options.acceptedMimeTypes
 
     @options.method = @options.method.toUpperCase()
-
-    if (fallback = @getExistingFallback()) and fallback.parentNode
-      # Remove the fallback
-      fallback.parentNode.removeChild fallback
 
     # Display previews in the previewsContainer element or the Dropzone element unless explicitly set to false
     if @options.previewsContainer != false
